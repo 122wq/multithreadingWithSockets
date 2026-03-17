@@ -49,5 +49,7 @@ public class SocketServerExample {
         //close the ServerSocket object
         server.close();
     }
+
+    
     
 }
