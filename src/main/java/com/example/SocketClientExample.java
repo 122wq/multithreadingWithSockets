@@ -53,9 +53,10 @@ public class SocketClientExample {
         String message;
         public InputThread()
         {
+            //text input
             myObj =  new Scanner(System.in);
         }
-        public void run()
+        public synchronized void run()
         {
             try {
                 while(true)
@@ -63,9 +64,10 @@ public class SocketClientExample {
                     System.out.println("Enter your message: ");
                     message = myObj.nextLine();
                     oos.writeObject(message);
+                    this.wait(100);
                 }
                
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -80,7 +82,7 @@ public class SocketClientExample {
                 while(true)
                 {
                     String messageFromServer = (String) ios.readObject();
-                    System.out.println(messageFromServer);
+                    System.out.println("" + messageFromServer);
                     //add something else (like a button) later
                     if (messageFromServer.equalsIgnoreCase("exit"))
                     {
