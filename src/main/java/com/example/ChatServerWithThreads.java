@@ -75,6 +75,7 @@ public class ChatServerWithThreads {
             {
                 handlers = new ArrayList<ConnectionHandler>();
             }
+            handlers.add(this);
         }
         public void run() 
         {
@@ -93,31 +94,39 @@ public class ChatServerWithThreads {
                     if (messageFromClient.equalsIgnoreCase("exit"))
                     {
                         System.out.println("Client " + clientAddress + " disconnects normally");
+                        handlers.remove(this);
                         break;
                     }
-                    oos.writeObject("Client says " + messageFromClient);
-                    oos.flush(); 
+                    
+                    for (int i = 0; i < handlers.size(); i++)
+                    {
+                        handlers.get(i).oos.writeObject("Someone says " + messageFromClient);
+                        handlers.get(i).oos.flush();
+                    }
+                        
+                    
+                    
                 }
 	        }
 	        catch (EOFException e)
             {
-	            // Client closed the connection; treat this as a normal disconnect.
-	            System.out.println("Client disconnected: " + clientAddress);
+	            // Client closed the connection; treat this as a abnormal disconnect.
+	            System.out.println("Client disconnected unexpectedly: " + clientAddress);
 	        }
 	        catch (Exception e)
             {
 	            System.out.println("Error on connection with: " 
 	                     + clientAddress + ": " + e);
 	        }
-            //close the client after the message was sent
-             
-            finally
+            //close the client if the client exits normally
+           finally
             {
                 try { 
                     
                     if (ois != null) ois.close();
                     if (oos != null) oos.close(); 
                     client.close();
+                    handlers.remove(this);
                 } catch (Exception e) {
                 }
             }
