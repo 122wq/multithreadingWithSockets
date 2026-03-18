@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class ChatServerWithThreads {
 
     public static final int LISTENING_PORT = 9876;
-    private ArrayList<String> threads = new ArrayList<String>();
+    
 
 
     public static void main(String[] args) 
@@ -46,7 +46,9 @@ public class ChatServerWithThreads {
             {
                 // Accept next connection request and handle it.
                 connection = listener.accept();
-                new ConnectionHandler(connection).start();
+                
+                ConnectionHandler c = new ConnectionHandler(connection);
+                c.start();
                
             }
         }
@@ -62,12 +64,17 @@ public class ChatServerWithThreads {
      */
     private static class ConnectionHandler extends Thread 
     {
+        private static ArrayList<ConnectionHandler> handlers;
         Socket client;
         ObjectOutputStream oos;
-        ObjectInputStream ios;
+        ObjectInputStream ois;
         ConnectionHandler(Socket socket) 
         {
             client = socket;
+            if (handlers == null)
+            {
+                handlers = new ArrayList<ConnectionHandler>();
+            }
         }
         public void run() 
         {
@@ -76,19 +83,20 @@ public class ChatServerWithThreads {
             {
 	            //your code to send messages goes here.
                 System.out.println("Connecting");
-                
-                ios = new ObjectInputStream(client.getInputStream());
+                String messageFromClient;
+                ois = new ObjectInputStream(client.getInputStream());
                 oos = new ObjectOutputStream(client.getOutputStream());
                 while(true)
-                {
-                    String messageFromClient = (String) ios.readObject();
+                { 
+                    messageFromClient = (String) ois.readObject();
                     System.out.println(messageFromClient);
-                    oos.writeObject("Client says " + messageFromClient);
-                    oos.flush();
                     if (messageFromClient.equalsIgnoreCase("exit"))
                     {
+                        System.out.println("Client " + clientAddress + " disconnects normally");
                         break;
                     }
+                    oos.writeObject("Client says " + messageFromClient);
+                    oos.flush(); 
                 }
 	        }
 	        catch (EOFException e)
@@ -102,16 +110,18 @@ public class ChatServerWithThreads {
 	                     + clientAddress + ": " + e);
 	        }
             //close the client after the message was sent
+             
             finally
             {
                 try { 
                     
-                    if (ios != null) ios.close();
+                    if (ois != null) ois.close();
                     if (oos != null) oos.close(); 
                     client.close();
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
-            
+        
         }
     }
 

@@ -1,4 +1,5 @@
 package com.example;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -12,7 +13,7 @@ public class SocketClientExample {
 	private InetAddress host;
     private Socket socket;
     private ObjectOutputStream oos;
-    private ObjectInputStream ios;
+    private ObjectInputStream ois;
 	
 	/*
 	 * Modify this example so that it opens a dialogue window using java swing, 
@@ -33,7 +34,7 @@ public class SocketClientExample {
             socket = new Socket(host.getHostName(), 9876);
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
-            ios = new ObjectInputStream(socket.getInputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
             InputThread i = new InputThread();
             OutputThread o = new OutputThread();
             i.start();
@@ -65,9 +66,15 @@ public class SocketClientExample {
                     message = myObj.nextLine();
                     oos.writeObject(message);
                     this.wait(100);
+                    if (message.equalsIgnoreCase("exit"))
+                    {
+                        break;
+                    }
                 }
                
-            } catch (Exception e) {
+            }
+ 
+            catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -81,15 +88,15 @@ public class SocketClientExample {
             try {
                 while(true)
                 {
-                    String messageFromServer = (String) ios.readObject();
+                    String messageFromServer = (String) ois.readObject();
                     System.out.println("" + messageFromServer);
                     //add something else (like a button) later
-                    if (messageFromServer.equalsIgnoreCase("exit"))
-                    {
-                        break;
-                    }
+                    
                 }
-            } catch (Exception e) {
+            }catch (EOFException e){
+                System.out.println("Client Disconnected");
+            } 
+             catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
