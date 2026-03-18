@@ -26,9 +26,7 @@ public class ChatServerWithThreads {
 
     public static void main(String[] args) 
     {
-        ChatServerWithThreads server = new ChatServerWithThreads();
-        
-
+        new ChatServerWithThreads();
     }  // end main()
 
     public ChatServerWithThreads()
@@ -94,7 +92,6 @@ public class ChatServerWithThreads {
                     if (messageFromClient.equalsIgnoreCase("exit"))
                     {
                         System.out.println("Client " + clientAddress + " disconnects normally");
-                        handlers.remove(this);
                         break;
                     }
                     
@@ -104,8 +101,6 @@ public class ChatServerWithThreads {
                         handlers.get(i).oos.flush();
                     }
                         
-                    
-                    
                 }
 	        }
 	        catch (EOFException e)
@@ -118,17 +113,16 @@ public class ChatServerWithThreads {
 	            System.out.println("Error on connection with: " 
 	                     + clientAddress + ": " + e);
 	        }
-            //close the client if the client exits normally
-           finally
+            //closes the client 
+            finally
             {
-                try { 
-                    
+                try {
                     if (ois != null) ois.close();
                     if (oos != null) oos.close(); 
                     client.close();
-                    handlers.remove(this);
                 } catch (Exception e) {
                 }
+                handlers.remove(this);
             }
         
         }

@@ -129,7 +129,7 @@ public class SocketClientExample {
             Thread.sleep(100);
         }
         */
-       SocketClientExample inputTest = new SocketClientExample();
+       new SocketClientExample();
         
     }
 }
