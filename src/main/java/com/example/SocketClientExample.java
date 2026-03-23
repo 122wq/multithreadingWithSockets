@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import javax.swing.*;
 
 
 public class SocketClientExample {
@@ -14,6 +15,8 @@ public class SocketClientExample {
     private Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
+    private JFrame gui = new JFrame("Chat Client");
+    private JTextField textBox;
 	
 	/*
 	 * Modify this example so that it opens a dialogue window using java swing, 
