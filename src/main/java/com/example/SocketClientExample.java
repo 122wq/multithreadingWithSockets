@@ -8,15 +8,18 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import javax.swing.*;
-
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class SocketClientExample {
 	private InetAddress host;
     private Socket socket;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
-    private JFrame gui = new JFrame("Chat Client");
+    private JFrame gui;
     private JTextField textBox;
+    private JButton exitButton;
 	
 	/*
 	 * Modify this example so that it opens a dialogue window using java swing, 
@@ -33,6 +36,7 @@ public class SocketClientExample {
     {
         //get the localhost IP address, if server is running on some other IP, you need to use that
         try {
+            GuiSetUp();
             host = InetAddress.getLocalHost();
             socket = new Socket(host.getHostName(), 9876);
             //write to socket using ObjectOutputStream
@@ -50,7 +54,31 @@ public class SocketClientExample {
         
         
     }
+    private void GuiSetUp()
+    {
+        gui = new JFrame("Chat Client");
+        gui.setLayout(new GridLayout(4,1));
+        textBox = new JTextField();
+        exitButton = new JButton("Exit");
+        exitButton.addActionListener(new ActionListener() {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                try {
+                    oos.writeObject("exit");
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+            
+        });
+        gui.add(textBox);
+        gui.add(exitButton);
+        gui.setSize(400,400);
+        gui.setVisible(true);
+    }
     private class InputThread extends Thread
     {
         Scanner myObj;
