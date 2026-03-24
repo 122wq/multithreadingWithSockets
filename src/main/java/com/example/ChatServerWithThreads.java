@@ -66,6 +66,7 @@ public class ChatServerWithThreads {
         Socket client;
         ObjectOutputStream oos;
         ObjectInputStream ois;
+        int clientNum;
         ConnectionHandler(Socket socket) 
         {
             client = socket;
@@ -74,6 +75,7 @@ public class ChatServerWithThreads {
                 handlers = new ArrayList<ConnectionHandler>();
             }
             handlers.add(this);
+            clientNum = handlers.size() - 1;
         }
         public void run() 
         {
@@ -89,15 +91,9 @@ public class ChatServerWithThreads {
                 { 
                     messageFromClient = (String) ois.readObject();
                     System.out.println(messageFromClient);
-                    if (messageFromClient.equalsIgnoreCase("exit"))
-                    {
-                        System.out.println("Client " + clientAddress + " disconnects normally");
-                        break;
-                    }
-                    
                     for (int i = 0; i < handlers.size(); i++)
                     {
-                        handlers.get(i).oos.writeObject("Someone says " + messageFromClient);
+                        handlers.get(i).oos.writeObject("Client " + clientNum + " says " + messageFromClient);
                         handlers.get(i).oos.flush();
                     }
                         
@@ -105,8 +101,8 @@ public class ChatServerWithThreads {
 	        }
 	        catch (EOFException e)
             {
-	            // Client closed the connection; treat this as a abnormal disconnect.
-	            System.out.println("Client disconnected unexpectedly: " + clientAddress);
+	            // Client closed the connection; treat this as a nomal disconnect.
+	            System.out.println("Client disconnected: " + clientAddress);
 	        }
 	        catch (Exception e)
             {
@@ -123,6 +119,20 @@ public class ChatServerWithThreads {
                 } catch (Exception e) {
                 }
                 handlers.remove(this);
+
+                String disconnectMessage = "Client " + clientNum + " disconnected.";
+                for (int i = 0; i < handlers.size(); i++)
+                {
+                    try {
+                        if (handlers.get(i).oos != null)
+                        {
+                            handlers.get(i).oos.writeObject(disconnectMessage);
+                            handlers.get(i).oos.flush();
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+                this.interrupt();
             }
         
         }

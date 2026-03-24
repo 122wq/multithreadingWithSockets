@@ -6,11 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class SocketClientExample {
 	private InetAddress host;
@@ -19,8 +16,9 @@ public class SocketClientExample {
     private ObjectInputStream ois;
     private JFrame gui;
     private JTextField textBox;
-    private JButton exitButton;
-	
+
+	private JTextArea textArea;
+    private JButton submitButton;
 	/*
 	 * Modify this example so that it opens a dialogue window using java swing, 
 	 * takes in a user message and sends it
@@ -57,54 +55,53 @@ public class SocketClientExample {
     private void GuiSetUp()
     {
         gui = new JFrame("Chat Client");
-        gui.setLayout(new GridLayout(4,1));
+        gui.setLayout(new GridLayout(3,1));
+        
+        textArea = new JTextArea("Enter Stuff Below: \n");
+        textArea.setEditable(false);
+        JScrollPane scroll = new JScrollPane (textArea);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         textBox = new JTextField();
-        exitButton = new JButton("Exit");
-        exitButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                try {
-                    oos.writeObject("exit");
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-            
-        });
+        submitButton = new JButton("Submit");
+        
+        gui.add(scroll);
         gui.add(textBox);
-        gui.add(exitButton);
+        gui.add(submitButton);
+  
         gui.setSize(400,400);
+        gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui.setVisible(true);
     }
     private class InputThread extends Thread
     {
-        Scanner myObj;
         String message;
+        boolean pressed;
         public InputThread()
         {
-            //text input
-            myObj =  new Scanner(System.in);
+            pressed = false;
+            submitButton.addActionListener(e ->
+            {
+                pressed = true;
+            });
         }
         public synchronized void run()
         {
-            try {
+            try 
+            {
                 while(true)
                 {
-                    System.out.println("Enter your message: ");
-                    message = myObj.nextLine();
-                    oos.writeObject(message);
-                    this.wait(100);
-                    if (message.equalsIgnoreCase("exit"))
+                    message = "";
+                    if (pressed)
                     {
-                        break;
+                        message = textBox.getText();
+                        oos.writeObject(message);
+                        oos.flush();
+                        this.wait(100);
+                        pressed = false;
                     }
                 }
-               
             }
- 
             catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -120,12 +117,15 @@ public class SocketClientExample {
                 while(true)
                 {
                     String messageFromServer = (String) ois.readObject();
+                    textArea.append(messageFromServer + "\n");
                     System.out.println("" + messageFromServer);
                     //add something else (like a button) later
                     
                 }
             }catch (EOFException e){
                 System.out.println("Disconnected from Server");
+                gui.dispose();
+                System.exit(0);
             } 
              catch (Exception e) {
                 // TODO Auto-generated catch block
