@@ -40,6 +40,7 @@ public class SocketClientExample {
             //write to socket using ObjectOutputStream
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
+            //create the input and output threads
             InputThread i = new InputThread();
             OutputThread o = new OutputThread();
             i.start();
