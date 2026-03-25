@@ -44,7 +44,7 @@ public class ChatServerWithThreads {
             {
                 // Accept next connection request and handle it.
                 connection = listener.accept();
-                
+                //create a new connection handler every time a connection request was made
                 ConnectionHandler c = new ConnectionHandler(connection);
                 c.start();
                
@@ -62,6 +62,7 @@ public class ChatServerWithThreads {
      */
     private static class ConnectionHandler extends Thread 
     {
+        //arraylist to store all of the handler threads for each client
         private static ArrayList<ConnectionHandler> handlers;
         Socket client;
         ObjectOutputStream oos;
@@ -75,6 +76,7 @@ public class ChatServerWithThreads {
                 handlers = new ArrayList<ConnectionHandler>();
             }
             handlers.add(this);
+            //assign each client a number
             clientNum = handlers.size() - 1;
         }
         public void run() 
@@ -85,12 +87,15 @@ public class ChatServerWithThreads {
 	            //your code to send messages goes here.
                 System.out.println("Connecting");
                 String messageFromClient;
+                //get the input and out stream
                 ois = new ObjectInputStream(client.getInputStream());
                 oos = new ObjectOutputStream(client.getOutputStream());
                 while(true)
                 { 
+                    //get the message from the client that sends it
                     messageFromClient = (String) ois.readObject();
                     System.out.println(messageFromClient);
+                    //write it to all clients running
                     for (int i = 0; i < handlers.size(); i++)
                     {
                         handlers.get(i).oos.writeObject("Client " + clientNum + " says " + messageFromClient);

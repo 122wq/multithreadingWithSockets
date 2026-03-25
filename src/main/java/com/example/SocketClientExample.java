@@ -53,17 +53,22 @@ public class SocketClientExample {
         
         
     }
+    //set up the gui
     private void GuiSetUp()
     {
         gui = new JFrame("Chat Client");
         gui.setLayout(new GridLayout(3,1));
         
+        //displaying message
         textArea = new JTextArea("Enter Stuff Below: \n");
         textArea.setEditable(false);
+        //scrolling
         JScrollPane scroll = new JScrollPane (textArea);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        //place to type the text
         textBox = new JTextField();
+        //press this to send a message
         submitButton = new JButton("Submit");
         
         gui.add(scroll);
@@ -80,6 +85,7 @@ public class SocketClientExample {
         boolean pressed;
         public InputThread()
         {
+            //variable to keep track of button state
             pressed = false;
             submitButton.addActionListener(e ->
             {
@@ -92,7 +98,9 @@ public class SocketClientExample {
             {
                 while(true)
                 {
+                    //reset the message 
                     message = "";
+                    //if the sumbit button is pressed then send the message to the server
                     if (pressed)
                     {
                         message = textBox.getText();
@@ -117,12 +125,12 @@ public class SocketClientExample {
             try {
                 while(true)
                 {
+                    //get the message sent from the server and added to the text area
                     String messageFromServer = (String) ois.readObject();
                     textArea.append(messageFromServer + "\n");
-                    System.out.println("" + messageFromServer);
-                    //add something else (like a button) later
-                    
+                    System.out.println("" + messageFromServer);                    
                 }
+                //make sure the client stop in the case of errors from either the server or client
             }catch (EOFException e){
                 System.out.println("Disconnected from Server");
                 gui.dispose();
